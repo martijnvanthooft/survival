@@ -17,6 +17,7 @@
 **                       value is always assumed to be = to 1.
 **       offset(n)    :offset for the linear predictor
 **       weights(n)   :case weights
+**       exposure(n)  :case exposure
 **       init         :initial estimate for the coefficients
 **       eps          :tolerance for convergence.  Iteration continues until
 **                       the percent change in loglikelihood is <= eps.
@@ -58,7 +59,7 @@
 */
 
 static double *a, *a2, **cmat2;
-static double *xtime, *weights, *offset;
+static double *xtime, *weights, *exposure, *offset;
 static int *status, *strata;
 static double *u; 
 static double **covar, **cmat, **imat;  /*ragged arrays */
@@ -66,7 +67,7 @@ static double **covar, **cmat, **imat;  /*ragged arrays */
 static double coxfit6_iter(int nvar, int nused, int method, double *beta);
 
 SEXP coxfit6(SEXP maxiter2,  SEXP time2,   SEXP status2, 
-	     SEXP covar2,    SEXP offset2, SEXP weights2,
+	     SEXP covar2,    SEXP offset2, SEXP weights2, SEXP exposure2,
 	     SEXP strata2,   SEXP method2, SEXP eps2, 
 	     SEXP toler2,    SEXP ibeta,    SEXP doscale2) {
 
@@ -102,6 +103,7 @@ SEXP coxfit6(SEXP maxiter2,  SEXP time2,   SEXP status2,
 
     xtime = REAL(time2);
     weights = REAL(weights2);
+    exposure = REAL(exposure2);
     offset= REAL(offset2);
     status = INTEGER(status2);
     strata = INTEGER(strata2);
@@ -154,19 +156,19 @@ SEXP coxfit6(SEXP maxiter2,  SEXP time2,   SEXP status2,
     */
     temp2=0;
     for (i=0; i<nused; i++) {
-	temp2 += weights[i];
+	temp2 += 1;
     }	
     for (i=0; i<nvar; i++) {
 	temp=0;
 	for (person=0; person<nused; person++) 
-	    temp += weights[person] * covar[i][person];
+	    temp += covar[i][person];
 	temp /= temp2;
 	means[i] = temp;
 	for (person=0; person<nused; person++) covar[i][person] -=temp;
 	if (doscale==1) {  /* and also scale it */
 	    temp =0;
 	    for (person=0; person<nused; person++) {
-		temp += weights[person] * fabs(covar[i][person]);
+		temp += fabs(covar[i][person]);
 	    }
 	    if (temp > 0) temp = temp2/temp;   /* scaling */
 	    else temp=1.0; /* rare case of a constant covariate */
@@ -395,7 +397,7 @@ static double coxfit6_iter(int nvar, int nused,  int method, double *beta) {
 		ndead++;
 		deadwt += weights[person];
 		denom2 += risk;
-		loglik += weights[person]*zbeta;
+		loglik += log(risk);
 
 		for (i=0; i<nvar; i++) {
 		    u[i] += weights[person]*covar[i][person];
@@ -411,7 +413,7 @@ static double coxfit6_iter(int nvar, int nused,  int method, double *beta) {
 	if (ndead >0) {  /* we need to add to the main terms */
 	    if (method==0 || ndead==1) { /* Breslow */
 		denom += denom2;
-		loglik -= deadwt* log(denom);
+		loglik -= log(denom);
 	   
 		for (i=0; i<nvar; i++) {
 		    a[i] += a2[i];

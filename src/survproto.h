@@ -113,7 +113,7 @@ void coxfit5_c(Sint *nusedx,   Sint *nvar,    Sint *strata,
 	       Sint *methodx,  double *expect) ;
 
 SEXP coxfit6(SEXP maxiter2,  SEXP time2,   SEXP status2, 
-	     SEXP covar2,    SEXP offset2, SEXP weights2,
+	     SEXP covar2,    SEXP offset2, SEXP weights2, SEXP exposure2,
 	     SEXP strata2,   SEXP method2, SEXP eps2, 
 	     SEXP toler2,    SEXP ibeta,    SEXP doscale2) ;
 

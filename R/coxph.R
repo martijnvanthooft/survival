@@ -1,6 +1,6 @@
 # Automatically generated from the noweb directory
 #tt <- function(x) x
-coxph <- function(formula, data, weights, subset, na.action,
+coxph <- function(formula, data, weights, exposure, subset, na.action,
         init, control, ties= c("efron", "breslow", "exact"),
         singular.ok =TRUE,  robust,
         model=FALSE, x=FALSE, y=TRUE,  tt, method=ties, 
@@ -75,7 +75,7 @@ coxph <- function(formula, data, weights, subset, na.action,
     # create a call to model.frame() that contains the formula (required)
     #  and any other of the relevant optional arguments
     #  but don't evaluate it just yet
-    indx <- match(c("formula", "data", "weights", "subset", "na.action",
+    indx <- match(c("formula", "data", "weights", "exposure", "subset", "na.action",
                     "cluster", "id", "istate"),
                   names(Call), nomatch=0) 
     if (indx[1] ==0) stop("A formula argument is required")
@@ -451,7 +451,7 @@ coxph <- function(formula, data, weights, subset, na.action,
         
         fit <- coxpenal.fit(X, Y, istrat, offset, init=init,
                             control,
-                            weights=weights, method=method,
+                            weights=weights, method=method, exposure=exposure,
                             row.names(mf), pcols, pattr, assign)
     }
     else {
@@ -465,7 +465,7 @@ coxph <- function(formula, data, weights, subset, na.action,
         }
         else stop(paste ("Unknown method", method))
 
-        fit <- fitter(X, Y, istrat, offset, init, control, weights=weights,
+        fit <- fitter(X, Y, istrat, offset, init, control, weights=weights, exposure=exposure,
                       method=method, row.names(mf))
     }
     if (is.character(fit)) {
@@ -560,6 +560,7 @@ coxph <- function(formula, data, weights, subset, na.action,
     }
     if (!is.null(weights) && any(weights!=1)) fit$weights <- weights
     names(fit$means) <- names(fit$coefficients)
+    if (!is.null(exposure) && any(exposure!=1)) fit$exposure <- exposure
 
     if (multi) {
         fit$transitions <- transitions

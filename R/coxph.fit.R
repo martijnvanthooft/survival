@@ -1,4 +1,4 @@
-coxph.fit <- function(x, y, strata, offset, init, control,
+coxph.fit <- function(x, y, strata, offset, exposure, init, control,
 			weights, method, rownames, resid=TRUE)
 {
     n <-  nrow(y)
@@ -22,10 +22,13 @@ coxph.fit <- function(x, y, strata, offset, init, control,
 	newstrat <- as.integer(c(1*(diff(as.numeric(strata))!=0), 1))
 	}
     if (missing(offset) || is.null(offset)) offset <- rep(0,n)
-    if (missing(weights)|| is.null(weights))weights<- rep(1,n)
+    if (missing(weights)|| is.null(weights)) weights <- rep(1,n)
+    if (missing(exposure) || is.null(weights)) exposure <- rep(1,n) 
     else {
 	if (any(weights<=0)) stop("Invalid weights, must be >0")
+  if (any(exposure<=0)) stop("Invalid exposure, must be >0")
 	weights <- weights[sorted]
+	exposure <- exposure[sorted]
 	}
     stime <- as.double(time[sorted])
     sstat <- as.integer(status[sorted])
@@ -57,6 +60,7 @@ coxph.fit <- function(x, y, strata, offset, init, control,
                      x[sorted,],
                      as.double(offset[sorted]),
                      weights,
+                     exposure,
                      newstrat,
                      as.integer(method=="efron"),
                      as.double(control$eps),
@@ -79,7 +83,7 @@ coxph.fit <- function(x, y, strata, offset, init, control,
             resid[sorted] <- coxres$resid
             names(resid) <- rownames
 
-            list( loglik = coxfit$loglik[1],
+            list(loglik = coxfit$loglik[1],
                  linear.predictors = offset,
                  residuals = resid,
                  method = method,
@@ -135,6 +139,7 @@ coxph.fit <- function(x, y, strata, offset, init, control,
 				newstrat,
 				as.double(score),
 				as.double(weights),
+				as.double(exposure),
 				resid=double(n))
             resid <- double(n)
             resid[sorted] <- coxres$resid
