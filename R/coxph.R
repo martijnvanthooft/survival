@@ -20,6 +20,7 @@ coxph <- function(formula, data, weights, exposure, subset, na.action,
                           names(extraArgs)[indx==0L]), domain = NA)
     }
     if (missing(control)) control <- coxph.control(...) 
+    if (missing(exposure)) exposure <- NULL
 
     # Move any cluster() term out of the formula, and make it an argument
     #  instead.  This makes everything easier.  But, I can only do that with
@@ -451,7 +452,7 @@ coxph <- function(formula, data, weights, exposure, subset, na.action,
         
         fit <- coxpenal.fit(X, Y, istrat, offset, init=init,
                             control,
-                            weights=weights, method=method, exposure=exposure,
+                            weights=weights, method=method,
                             row.names(mf), pcols, pattr, assign)
     }
     else {

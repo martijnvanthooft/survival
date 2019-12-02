@@ -23,13 +23,16 @@ coxph.fit <- function(x, y, strata, offset, exposure, init, control,
 	}
     if (missing(offset) || is.null(offset)) offset <- rep(0,n)
     if (missing(weights)|| is.null(weights)) weights <- rep(1,n)
-    if (missing(exposure) || is.null(weights)) exposure <- rep(1,n) 
     else {
-	if (any(weights<=0)) stop("Invalid weights, must be >0")
-  if (any(exposure<=0)) stop("Invalid exposure, must be >0")
-	weights <- weights[sorted]
-	exposure <- exposure[sorted]
-	}
+      if (any(weights<=0)) stop("Invalid weights, must be >0")
+	    weights <- weights[sorted]
+    }
+    if (missing(exposure) || is.null(exposure)) exposure <- rep(1,n) 
+    else {
+      if (any(exposure<=0)) stop("Invalid exposure, must be >0")
+      exposure <- exposure[sorted]
+    }
+    
     stime <- as.double(time[sorted])
     sstat <- as.integer(status[sorted])
 
@@ -139,7 +142,6 @@ coxph.fit <- function(x, y, strata, offset, exposure, init, control,
 				newstrat,
 				as.double(score),
 				as.double(weights),
-				as.double(exposure),
 				resid=double(n))
             resid <- double(n)
             resid[sorted] <- coxres$resid

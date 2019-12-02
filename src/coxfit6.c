@@ -382,16 +382,16 @@ static double coxfit6_iter(int nvar, int nused,  int method, double *beta) {
 	    nrisk++;
 	    zbeta = offset[person];    /* form the term beta*z (vector mult) */
 	    for (i=0; i<nvar; i++)
-		zbeta += beta[i]*covar[i][person];
-	    risk = exp(zbeta) * weights[person];
+		    zbeta += beta[i]*covar[i][person];
+	      risk = exp(zbeta) * weights[person] * exposure[person];
 	    if (status[person] ==0) {
-		denom += risk;
+		    denom += risk;
 		/* a contains weighted sums of x, cmat sums of squares */
 		for (i=0; i<nvar; i++) {
 		    a[i] += risk*covar[i][person];
 		    for (j=0; j<=i; j++)
-			cmat[i][j] += risk*covar[i][person]*covar[j][person];
-	        }
+			    cmat[i][j] += risk*covar[i][person]*covar[j][person];
+		    }
 	    }	
 	    else {
 		ndead++;

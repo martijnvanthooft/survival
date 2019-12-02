@@ -15,7 +15,7 @@ and other extensions are incorporated using the counting process formulation
 of Andersen and Gill. 
 }
 \usage{
-coxph(formula, data=, weights, subset, 
+coxph(formula, data=, weights, exposure, subset, 
       na.action, init, control, 
       ties=c("efron","breslow","exact"), 
       singular.ok=TRUE, robust, 
