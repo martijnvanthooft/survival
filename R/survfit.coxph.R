@@ -76,10 +76,9 @@ survfit.coxph <-
       }
       coxms <- inherits(object, "coxphms")
       if (coxms || is.null(object$y) || is.null(object[['x']]) ||
-          !is.null(object$call$weights) || !is.null(object$call$id) ||
+          !is.null(object$call$weights) || !is.null(object$call$exposure) || !is.null(object$call$id) ||
           (has.strata && is.null(object$strata)) ||
           !is.null(attr(object$terms, 'offset'))) {
-          
           mf <- stats::model.frame(object)
           }
       else mf <- NULL  #useful for if statements later
@@ -87,12 +86,15 @@ survfit.coxph <-
       Y <- object[['y']]
       if (is.null(mf)) {
           weights <- rep(1., n)
+          exposure <- rep(1., n)
           offset <- rep(0., n)
           X <- object[['x']]
       }
       else {
           weights <- model.weights(mf)
           if (is.null(weights)) weights <- rep(1.0, n)
+          exposure <- object$`exposure`
+          if (is.null(exposure)) exposure <- rep(1.0, n)
           offset <- model.offset(mf)
           if (is.null(offset)) offset <- rep(0., n)
           X <- model.matrix.coxph(object, data=mf)
@@ -161,13 +163,13 @@ survfit.coxph <-
       else {
           varmat <- object$var
           beta <- ifelse(is.na(object$coefficients), 0, object$coefficients)
-          xcenter <- sum(object$means * beta)+ mean(offset)
+          xcenter <- sum(object$means * beta) + mean(offset)
           if (!is.null(object$frail)) {
              keep <- !grepl("frailty(", dimnames(X)[[2]], fixed=TRUE)
              X <- X[,keep, drop=F]
           }
               
-          risk <- c(exp(X%*% beta + offset - xcenter))
+          risk <- c(exp(X%*% beta + offset - xcenter)*exposure)
       }
       if (missing(newdata)) {
           # If the model has interactions, print out a long warning message.
@@ -259,7 +261,13 @@ survfit.coxph <-
           if (length(x2)==0) stop("Individual survival but no variables")
 
           offset2 <- model.offset(mf2)
-          if (length(offset2) ==0) offset2 <- 0
+          if (length(offset2)==0) offset2 <- 0
+          
+          if (!is.null(object$`exposure`) && !any(colnames(newdata) == 'exposure')){
+            stop("Your coxph contains an exposure term, please include a column with name 'exposure' to the newdata frame")
+          } else if(any(colnames(newdata) == 'exposure')){
+            exposure2 <- as.vector(newdata[['exposure']])
+          } else exposure2 <- 1
                        
           y2 <- model.extract(mf2, 'response')
           if (attr(y2,'type') != type)
@@ -282,22 +290,27 @@ survfit.coxph <-
           offset2 <- model.offset(mf2)
           if (length(offset2) >0) offset2 <- offset2 
           else offset2 <- 0
+          if (!is.null(object$`exposure`) && !any(colnames(newdata) == 'exposure')){
+            stop("Your coxph contains an exposure term, please include a column with name 'exposure' to the newdata frame")
+          } else if(any(colnames(newdata) == 'exposure')){
+            exposure2 <- as.vector(newdata[['exposure']])
+          } else exposure2 <- 1
           x2 <- model.matrix(Terms2, mf2)[,-1, drop=FALSE]  #no intercept
       }
       if (missing(newdata)) risk2 <- 1
       else {
           if (length(object$means)) 
-              risk2 <- exp(c(x2 %*% beta) + offset2 - xcenter)
-          else risk2 <- exp(offset2 - xcenter)
+              risk2 <- exp(c(x2 %*% beta) + offset2 - xcenter) * exposure2
+          else risk2 <- exp(offset2 - xcenter) * exposure2
       }
       if (individual) {
           result <- coxsurv.fit(ctype, stype, se.fit, varmat, cluster, 
-                                 Y, X, weights, risk, position, strata, oldid,
+                                 Y, X, weights, exposure, risk, position, strata, oldid,
                                  y2, x2, risk2, strata2, id2)
       }
       else {
           result <- coxsurv.fit(ctype, stype, se.fit, varmat, cluster, 
-                                 Y, X, weights, risk, position, strata, oldid,
+                                 Y, X, weights, exposure, risk, position, strata, oldid,
                                  y2, x2, risk2)
           if (has.strata && found.strata) {
               if (is.matrix(result$surv)) {

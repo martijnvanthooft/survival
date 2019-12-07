@@ -1,6 +1,6 @@
 # Automatically generated from the noweb directory
 coxsurv.fit <- function(ctype, stype, se.fit, varmat, cluster, 
-                         y, x, wt, risk, position, strata, oldid,
+                         y, x, wt, exposure, risk, position, strata, oldid,
                          y2, x2, risk2, strata2, id2, unlist=TRUE) {
 
     if (missing(strata) || length(strata)==0) strata <- rep(0L, nrow(y))
