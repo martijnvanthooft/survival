@@ -531,12 +531,24 @@ coxph <- function(formula, data, weights, exposure, subset, na.action,
         # Concordance.  Done here so that we can use cluster if it is present
         # The returned value is a subset of the full result, partly because it
         #  is all we need, but more for backward compatability with survConcordance.fit
-        if (length(cluster))
-            temp <- concordancefit(Y, fit$linear.predictors, istrat, weights,
+        if (length(cluster)){
+          if (!is.null(exposure) && !any(exposure == 0) && any(exposure != 0)){
+            temp <- concordancefit(Y, fit$linear.predictors + log(fit$exposure), istrat, weights,
                                               cluster=cluster, reverse=TRUE,
                                     timefix= FALSE)
-        else temp <- concordancefit(Y, fit$linear.predictors, istrat, weights,
+          } else {
+            temp <- concordancefit(Y, fit$linear.predictors, istrat, weights,
+                                   cluster=cluster, reverse=TRUE, timefix= FALSE)
+          }
+        } else{ 
+          if(!is.null(exposure) && !any(exposure == 0) && any(exposure != 0)) {
+            temp <- concordancefit(Y, fit$linear.predictors + log(exposure), istrat, weights,
                                       reverse=TRUE, timefix= FALSE)
+          } else {
+            temp <- concordancefit(Y, fit$linear.predictors, istrat, weights,
+                                   reverse=TRUE, timefix= FALSE)
+          }
+        }
         if (is.matrix(temp$count))
              fit$concordance <- c(colSums(temp$count), concordance=temp$concordance,
                                   std=sqrt(temp$var))

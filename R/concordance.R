@@ -512,6 +512,7 @@ concordance.coxph <- function(object, ..., newdata, cluster, ymin, ymax,
     rval$call <- Call
     rval
 }
+
 cord.work <- function(data, timewt, ymin, ymax, influence=0, ranks=FALSE, 
                       reverse, fname, keepstrata) {
     Call <- match.call()
