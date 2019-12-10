@@ -4,7 +4,7 @@
 */
 SEXP agfit4(SEXP n2,
 	    SEXP surv2,      SEXP covar2,    SEXP strata2,
-            SEXP weights2,   SEXP offset2,   SEXP ibeta2,
+            SEXP weights2,   SEXP exposure2, SEXP offset2,   SEXP ibeta2,
             SEXP sort12,     SEXP sort22,    SEXP method2,
             SEXP maxiter2,   SEXP  eps2,     SEXP tolerance2,
 	    SEXP doscale2);

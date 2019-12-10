@@ -4,7 +4,7 @@
 #include "survproto.h"
 
 SEXP agfit4(SEXP nused2, SEXP surv2,      SEXP covar2,    SEXP strata2,
-            SEXP weights2,   SEXP offset2,   SEXP ibeta2,
+            SEXP weights2,   SEXP exposure2, SEXP offset2,   SEXP ibeta2,
             SEXP sort12,     SEXP sort22,    SEXP method2,
             SEXP maxiter2,   SEXP  eps2,     SEXP tolerance2,
             SEXP doscale2) { 
@@ -32,7 +32,7 @@ SEXP agfit4(SEXP nused2, SEXP surv2,      SEXP covar2,    SEXP strata2,
  
     /* inputs */
     double *start, *tstop, *event;
-    double *weights, *offset;
+    double *weights, *exposure, *offset;
     int *sort1, *sort2, maxiter;
     int *strata;
     double method;  /* saving this as double forces some double arithmetic */
@@ -64,6 +64,7 @@ SEXP agfit4(SEXP nused2, SEXP surv2,      SEXP covar2,    SEXP strata2,
     tstop  = start + nr;
     event = tstop + nr;
     weights = REAL(weights2);
+    exposure = REAL(exposure2);
     offset = REAL(offset2);
     sort1  = INTEGER(sort12);
     sort2  = INTEGER(sort22);
@@ -178,7 +179,7 @@ SEXP agfit4(SEXP nused2, SEXP surv2,      SEXP covar2,    SEXP strata2,
             zbeta = 0;      /* form the term beta*z   (vector mult) */
             for (i=0; i<nvar; i++)
                 zbeta += beta[i]*covar[i][p];
-            eta[p] = zbeta + offset[p];
+            eta[p] = zbeta + log(exposure[p]) + offset[p];
         }
 
         /*
@@ -187,7 +188,7 @@ SEXP agfit4(SEXP nused2, SEXP surv2,      SEXP covar2,    SEXP strata2,
         **  'dtime' is a scratch variable holding the time of current interest
         **  'indx1' walks through the start times.  
         */
-        newlk =0;
+        newlk=0;
         for (i=0; i<nvar; i++) {
             u[i] =0;
             for (j=0; j<nvar; j++) imat[i][j] =0;
@@ -311,7 +312,7 @@ SEXP agfit4(SEXP nused2, SEXP surv2,      SEXP covar2,    SEXP strata2,
                     deaths++;
                     denom2 += risk;
                     meanwt += weights[p];
-                    newlk += weights[p]* eta[p];
+                    newlk += weights[p] * eta[p];
                     for (i=0; i<nvar; i++) {
                         u[i] += weights[p] * covar[i][p];
                         a2[i]+= risk*covar[i][p];
@@ -442,7 +443,7 @@ SEXP agfit4(SEXP nused2, SEXP surv2,      SEXP covar2,    SEXP strata2,
                        zbeta = 0;      /* form the term beta*z   (vector mult) */
                        for (i=0; i<nvar; i++)
                            zbeta += beta[i]*covar[i][p];
-                       eta[p] = zbeta + offset[p];
+                       eta[p] = zbeta + log(exposure[p]) + offset[p];
                    }
 
                    /*

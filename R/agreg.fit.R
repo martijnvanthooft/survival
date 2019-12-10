@@ -1,15 +1,18 @@
 # Automatically generated from the noweb directory
 agreg.fit <- function(x, y, strata, offset, init, control,
-                        weights, method, rownames, resid=TRUE)
+                        weights, exposure, method, rownames, resid=TRUE)
     {
     nvar <- ncol(x)
     event <- y[,3]
     if (all(event==0)) stop("Can't fit a Cox model with 0 failures")
 
     if (missing(offset) || is.null(offset)) offset <- rep(0.0, nrow(y))
-    if (missing(weights)|| is.null(weights))weights<- rep(1.0, nrow(y))
+    if (missing(weights)|| is.null(weights)) weights <- rep(1.0, nrow(y))
     else if (any(weights<=0)) stop("Invalid weights, must be >0")
     else weights <- as.vector(weights)
+    if (missing(exposure) || is.null(exposure)) exposure <- rep(1.0, nrow(y)) 
+    else if (any(exposure<=0)) stop("Invalid exposure, must be >0")
+    else exposure <- as.vector(exposure)
 
     # Find rows to be ignored.  We have to match within strata: a
     #  value that spans a death in another stratum, but not it its
@@ -67,7 +70,7 @@ agreg.fit <- function(x, y, strata, offset, init, control,
     storage.mode(y) <- storage.mode(x) <- "double"
     storage.mode(offset) <- storage.mode(weights) <- "double"
     agfit <- .Call(Cagfit4, nused, 
-                   y, x, strata, weights, 
+                   y, x, strata, weights, exposure,
                    offset,
                    as.double(init), 
                    sort.start, sort.end, 
