@@ -203,6 +203,7 @@ coxph <- function(formula, data, weights, exposure, subset, na.action,
             attr(mf, "na.action") <- temp
             Y <- Y[!omit]
             id <- id[!omit]
+            exposure <- exposure[!omit]
             if (length(istate)) istate <- istate[!omit]  # istate can be NULL
         }
     }
