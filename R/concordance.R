@@ -350,7 +350,7 @@ cord.getdata <- function(object, newdata=NULL, cluster=NULL, need.wt, timefix=TR
             else stop("left hand side of the formula  must be a numeric vector or a survival object")
         }
         if (timefix) y <- aeqSurv(y)
-        rval <- list(y= y, x= predict(object))
+        rval <- list(y= y, x=predict(object, newdata))
         # the type of prediction does not matter, as long as it is a 
         #  monotone transform of the linear predictor
     } 
@@ -399,6 +399,7 @@ cord.getdata <- function(object, newdata=NULL, cluster=NULL, need.wt, timefix=TR
     else rval$cluster <- cluster
     rval
 }
+
 concordance.lm <- function(object, ..., newdata, cluster, ymin, ymax, 
                            influence=0, ranks=FALSE, timefix=TRUE,
                            keepstrata=10) {
