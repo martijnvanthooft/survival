@@ -130,6 +130,7 @@ coxph.fit <- function(x, y, strata, offset, exposure, init, control,
 		    score  = coxfit$sctest,
 		    iter   = coxfit$iter,
 		    linear.predictors = as.vector(lp),
+		    exposure = as.vector(exposure),
 		    means = coxfit$means,
                     method = method,
  		    class ='coxph')
